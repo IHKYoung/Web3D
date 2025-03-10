@@ -1,5 +1,5 @@
 /*
-Copyright © 2010-2024 three.js authors & Mark Kellogg
+Copyright © 2010-2024 three.js authors & Clarke Young
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

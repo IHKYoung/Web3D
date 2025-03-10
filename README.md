@@ -439,4 +439,4 @@ export default defineConfig({
   ],
 });
 ```
-There are other ways to configure Vite to handle this referenced in issue [#41](https://github.com/mkkellogg/GaussianSplats3D/issues/41).
+There are other ways to configure Vite to handle this referenced in issue [#41](https://github.com/IHKYoung/Web3D/issues/41).

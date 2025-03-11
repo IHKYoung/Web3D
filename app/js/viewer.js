@@ -12,6 +12,7 @@ let currentCameraLookAtArray;
 let currentAntialiased;
 let current2DScene;
 let currentSphericalHarmonicsDegree;
+let currentViewer = null; // 当前查看器实例
 
 /**
  * 将文件缓冲区转换为点云缓冲区
@@ -138,9 +139,11 @@ function runViewer(splatBufferData, format, alphaRemovalThreshold, cameraUpArray
     
     history.pushState("ViewSplat", null);
     const viewer = new GaussianSplats3D.Viewer(viewerOptions);
+    currentViewer = viewer; // 保存查看器实例
+    
     viewer.addSplatBuffers([splatBuffer], [splatBufferOptions])
       .then(() => {
-        // 为查看器的canvas元素添加类名
+        // 为点云查看器创建的canvas添加类名
         const viewerCanvas = document.querySelector('canvas');
         if (viewerCanvas) {
           viewerCanvas.className = 'viewer-canvas';
@@ -149,8 +152,133 @@ function runViewer(splatBufferData, format, alphaRemovalThreshold, cameraUpArray
         viewer.start();
         window.utils.setViewLoadingIconVisibility(false);
         window.utils.setViewStatus("场景加载成功。");
+        
+        // 显示工具栏
+        showViewerToolbar();
       });
   });
+}
+
+/**
+ * 显示查看器工具栏
+ */
+function showViewerToolbar() {
+  const toolbar = document.getElementById('viewer-toolbar');
+  if (toolbar) {
+    toolbar.classList.remove('hidden');
+  }
+}
+
+/**
+ * 隐藏查看器工具栏
+ */
+function hideViewerToolbar() {
+  const toolbar = document.getElementById('viewer-toolbar');
+  if (toolbar) {
+    toolbar.classList.add('hidden');
+  }
+}
+
+/**
+ * 返回到文件选择界面
+ */
+function backToFileSelection() {
+  // 停止当前查看器
+  if (currentViewer) {
+    currentViewer.dispose();
+    currentViewer = null;
+  }
+  
+  // 显示文件选择容器
+  document.getElementById("cloud-container").style.display = 'block';
+  
+  // 显示背景
+  const bgContainer = document.getElementById('background-container');
+  if (bgContainer) {
+    bgContainer.style.display = 'block';
+  }
+  
+  // 隐藏工具栏
+  hideViewerToolbar();
+  
+  // 重新初始化背景
+  if (typeof initBackground === 'function') {
+    initBackground();
+  }
+  
+  // 更新历史记录
+  history.pushState("FileSelection", null);
+}
+
+/**
+ * 截图功能
+ */
+function takeScreenshot() {
+  if (!currentViewer) return;
+  
+  try {
+    // 隐藏工具栏以便截图
+    const toolbar = document.getElementById('viewer-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
+    
+    // 获取canvas元素
+    const canvas = document.querySelector('canvas');
+    if (!canvas) {
+      console.error('找不到canvas元素');
+      return;
+    }
+    
+    // 创建下载链接
+    const link = document.createElement('a');
+    link.download = 'mindcloud-screenshot-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.png';
+    
+    // 将canvas内容转换为数据URL
+    link.href = canvas.toDataURL('image/png');
+    
+    // 模拟点击下载
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // 恢复工具栏显示
+    if (toolbar) toolbar.style.display = '';
+  } catch (error) {
+    console.error('截图失败:', error);
+  }
+}
+
+/**
+ * 测量功能
+ */
+function toggleMeasurement() {
+  // 这里是测量功能的实现
+  // 由于需要与Three.js和GaussianSplats3D进行深度集成
+  // 这里只是一个占位实现
+  alert('测量功能正在开发中...');
+}
+
+/**
+ * 切换地形显示
+ */
+function toggleTerrainDisplay() {
+  // 调用background.js中的toggleTerrain函数
+  if (typeof window.toggleTerrain === 'function') {
+    // 获取当前地形显示状态并切换
+    const showTerrain = document.querySelector('.terrain-visible') === null;
+    window.toggleTerrain(showTerrain);
+    
+    // 更新按钮状态
+    const terrainButton = document.getElementById('btn-toggle-terrain');
+    if (terrainButton) {
+      if (showTerrain) {
+        terrainButton.classList.add('terrain-visible');
+        terrainButton.textContent = '隐藏地形';
+      } else {
+        terrainButton.classList.remove('terrain-visible');
+        terrainButton.textContent = '显示地形';
+      }
+    }
+  }
 }
 
 // 导出函数
@@ -165,6 +293,21 @@ document.getElementById("viewFile").addEventListener("change", function() {
 // 添加查看按钮事件
 document.querySelector(".btn-view").addEventListener("click", function() {
   viewSplat();
+});
+
+// 添加工具栏按钮事件
+document.addEventListener('DOMContentLoaded', function() {
+  // 返回按钮
+  document.getElementById('btn-back').addEventListener('click', backToFileSelection);
+  
+  // 测量按钮
+  document.getElementById('btn-measure').addEventListener('click', toggleMeasurement);
+  
+  // 截图按钮
+  document.getElementById('btn-screenshot').addEventListener('click', takeScreenshot);
+  
+  // 切换地形按钮
+  document.getElementById('btn-toggle-terrain').addEventListener('click', toggleTerrainDisplay);
 });
 
 // 添加窗口大小变化事件处理

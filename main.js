@@ -96,28 +96,47 @@ function createWindow() {
 
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 1200,
+    width: 1280,
     height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    title: 'MindCloud 3DViewer',
+    icon: path.join(__dirname, 'app/assets/icons/icon.png'),
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),  // 使用.cjs扩展名的预加载脚本
-      // 添加以下设置以支持SharedArrayBuffer
-      webSecurity: false,  // 关闭网页安全限制，允许跨源请求
-      allowRunningInsecureContent: true,  // 允许运行不安全的内容
+      nodeIntegration: true,
+      contextIsolation: false,
+      webSecurity: false,
+      allowRunningInsecureContent: true,
       nodeIntegrationInWorker: true,
-      // 允许在预加载脚本中使用Node.js API
       sandbox: false
-    },
-    icon: fs.existsSync(path.join(buildAppDir, 'assets/images/mt3d.png')) ?
-          path.join(buildAppDir, 'assets/images/mt3d.png') :
-          path.join(appDir, 'assets/images/mt3d.png')
+    }
+  });
+
+  // 强制设置最小窗口尺寸
+  mainWindow.setMinimumSize(800, 600);
+
+  // 监听窗口大小变化，确保不小于最小尺寸
+  mainWindow.on('resize', () => {
+    const size = mainWindow.getSize();
+    let [width, height] = size;
+    let resized = false;
+    
+    if (width < 800) {
+      width = 800;
+      resized = true;
+    }
+    
+    if (height < 600) {
+      height = 600;
+      resized = true;
+    }
+    
+    if (resized) {
+      mainWindow.setSize(width, height);
+    }
   });
 
   // 设置跨源隔离策略，以支持SharedArrayBuffer
-  // 这些头等同于HTTP响应头：
-  // Cross-Origin-Opener-Policy: same-origin
-  // Cross-Origin-Embedder-Policy: require-corp
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
@@ -175,7 +194,7 @@ function createWindow() {
             dialog.showMessageBox(mainWindow, {
               title: '关于',
               message: 'MindCloud 3DViewer',
-              detail: '© 2025 Manifold Tech Limited\n版本: 0.0.1\n作者: Clarke Young',
+              detail: ' 2025 Manifold Tech Limited\n版本: 0.0.1\n作者: Clarke Young',
               buttons: ['确定']
             });
           }

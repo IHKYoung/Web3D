@@ -192,7 +192,7 @@ function backToFileSelection() {
   // 显示文件选择容器
   document.getElementById("cloud-container").style.display = 'block';
   
-  // 显示背景
+  // 显示背景容器
   const bgContainer = document.getElementById('background-container');
   if (bgContainer) {
     bgContainer.style.display = 'block';
@@ -201,9 +201,36 @@ function backToFileSelection() {
   // 隐藏工具栏
   hideViewerToolbar();
   
+  // 恢复背景颜色
+  document.body.style.backgroundColor = "";
+  
+  // 确保背景画布存在
+  let bgCanvas = document.getElementById('bgCanvas');
+  if (!bgCanvas) {
+    bgCanvas = document.createElement('canvas');
+    bgCanvas.id = 'bgCanvas';
+    if (bgContainer) {
+      bgContainer.appendChild(bgCanvas);
+    } else {
+      document.body.insertBefore(bgCanvas, document.body.firstChild);
+    }
+  }
+  
   // 重新初始化背景
   if (typeof initBackground === 'function') {
     initBackground();
+  }
+  
+  // 更新历史记录
+  window.utils.setViewLoadingIconVisibility(false);
+  window.utils.setViewStatus("");
+  window.utils.setViewError("");
+  
+  // 清空文件选择输入框
+  const viewFileInput = document.getElementById("viewFile");
+  if (viewFileInput) {
+    viewFileInput.value = "";
+    document.getElementById("viewFileName").textContent = "(No file chosen)";
   }
   
   // 更新历史记录
@@ -268,14 +295,14 @@ function toggleTerrainDisplay() {
     window.toggleTerrain(showTerrain);
     
     // 更新按钮状态
-    const terrainButton = document.getElementById('btn-toggle-terrain');
+    const terrainButton = document.getElementById('btn-toggle-background');
     if (terrainButton) {
       if (showTerrain) {
         terrainButton.classList.add('terrain-visible');
-        terrainButton.textContent = '隐藏地形';
+        terrainButton.textContent = '隐藏背景';
       } else {
         terrainButton.classList.remove('terrain-visible');
-        terrainButton.textContent = '显示地形';
+        terrainButton.textContent = '显示背景';
       }
     }
   }
@@ -307,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btn-screenshot').addEventListener('click', takeScreenshot);
   
   // 切换地形按钮
-  document.getElementById('btn-toggle-terrain').addEventListener('click', toggleTerrainDisplay);
+  document.getElementById('btn-toggle-background').addEventListener('click', toggleTerrainDisplay);
 });
 
 // 添加窗口大小变化事件处理

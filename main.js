@@ -7,6 +7,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import url from 'url';
+import os from 'os';
+
+// 设置内存限制，设为系统内存的一半
+// 注意：此设置只在应用启动时生效，不能在运行时修改
+const totalMem = os.totalmem() / (1024 * 1024 * 1024); // 转换为GB
+const memLimit = Math.min(8, Math.floor(totalMem / 2)); // 8GB 和 系统内存的一半 选最小
+app.commandLine.appendSwitch('js-flags', `--max-old-space-size=${memLimit * 1024}`);
 
 // 获取__dirname和__filename
 // ES模块中不直接提供__dirname和__filename内置变量
@@ -21,16 +28,36 @@ const __dirname = path.dirname(__filename);
 // 保持对window对象的全局引用，避免JavaScript对象被垃圾回收时，窗口被自动关闭
 let mainWindow;
 
-// 判断是否为开发环境
 // 使用NODE_ENV环境变量来判断
 // 当使用npm run dev时，NODE_ENV为development
 // 当使用npm run dist或打包后运行时，NODE_ENV为production
+
+// 开发环境检测
+// 主要依赖NODE_ENV环境变量，同时考虑打包状态作为备选判断
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // 打印当前环境变量，便于调试
 console.log('当前环境变量 NODE_ENV:', process.env.NODE_ENV);
 console.log('是否为开发环境:', isDevelopment);
 console.log('是否为打包应用:', app.isPackaged);
+
+/**
+ * 解析应用路径，优先使用build/app目录
+ * @param {string} relativePath - 相对路径
+ * @returns {string|null} - 返回绝对路径或null（如果文件不存在）
+ */
+function resolveAppPath(relativePath) {
+  // 尝试两种可能的路径，优先使用build/app
+  const buildAppPath = path.join(__dirname, 'build/app', relativePath);
+  const appPath = path.join(__dirname, 'app', relativePath);
+  
+  if (fs.existsSync(buildAppPath)) {
+    return buildAppPath;
+  } else if (fs.existsSync(appPath)) {
+    return appPath;
+  }
+  return null;
+}
 
 /**
  * 创建主窗口
@@ -45,20 +72,17 @@ function createWindow() {
   console.log('检查app目录是否存在:', fs.existsSync(appDir));
   
   // 尝试两种可能的路径，优先使用build/app
-  let indexPath, threeJsPath, gaussianSplatsPath;
+  const indexPath = resolveAppPath('index.html');
+  const threeJsPath = resolveAppPath('lib/three.module.js');
+  const gaussianSplatsPath = resolveAppPath('lib/gaussian-splats-3d.module.js');
   
-  if (fs.existsSync(buildAppDir)) {
-    // 优先使用build/app路径
-    indexPath = path.join(buildAppDir, 'index.html');
-    threeJsPath = path.join(buildAppDir, 'lib/three.module.js');
-    gaussianSplatsPath = path.join(buildAppDir, 'lib/gaussian-splats-3d.module.js');
-  } else if (fs.existsSync(appDir)) {
-    // 如果build/app不存在，则使用app路径
-    indexPath = path.join(appDir, 'index.html');
-    threeJsPath = path.join(appDir, 'lib/three.module.js');
-    gaussianSplatsPath = path.join(appDir, 'lib/gaussian-splats-3d.module.js');
+  if (!indexPath) {
+    // 如果index.html不存在，创建app目录和lib目录
+    if (!fs.existsSync(appDir)) {
+      console.log('创建app目录:', appDir);
+      fs.mkdirSync(appDir, { recursive: true });
+    }
     
-    // 如果lib目录不存在，创建它
     const libDir = path.join(appDir, 'lib');
     if (!fs.existsSync(libDir)) {
       console.log('创建lib目录:', libDir);
@@ -66,30 +90,25 @@ function createWindow() {
     }
     
     // 如果three.js文件不存在，尝试从node_modules复制
-    if (!fs.existsSync(threeJsPath)) {
-      const nodeModulesThreePath = path.join(__dirname, 'node_modules/three/build/three.module.js');
-      if (fs.existsSync(nodeModulesThreePath)) {
-        console.log('复制three.module.js到lib目录');
-        fs.copyFileSync(nodeModulesThreePath, threeJsPath);
-      }
+    const nodeModulesThreePath = path.join(__dirname, 'node_modules/three/build/three.module.js');
+    if (fs.existsSync(nodeModulesThreePath)) {
+      const targetThreePath = path.join(libDir, 'three.module.js');
+      console.log('复制three.module.js到lib目录');
+      fs.copyFileSync(nodeModulesThreePath, targetThreePath);
     }
-  } else {
-    // 都不存在，使用默认路径
-    console.error('警告: 既没有找到build/app目录也没有找到app目录，使用默认路径');
-    indexPath = path.join(__dirname, 'build/app/index.html');
-    threeJsPath = path.join(__dirname, 'build/app/lib/three.module.js');
-    gaussianSplatsPath = path.join(__dirname, 'build/app/lib/gaussian-splats-3d.module.js');
   }
   
+  // 检查文件路径
+  const finalIndexPath = resolveAppPath('index.html');
   console.log('检查文件路径:');
-  console.log(`index.html: ${indexPath} - 存在: ${fs.existsSync(indexPath)}`);
-  console.log(`three.module.js: ${threeJsPath} - 存在: ${fs.existsSync(threeJsPath)}`);
-  console.log(`gaussian-splats-3d.module.js: ${gaussianSplatsPath} - 存在: ${fs.existsSync(gaussianSplatsPath)}`);
+  console.log(`index.html: ${finalIndexPath || '不存在'}`);
+  console.log(`three.module.js: ${threeJsPath || '不存在'}`);
+  console.log(`gaussian-splats-3d.module.js: ${gaussianSplatsPath || '不存在'}`);
 
   // 如果index.html不存在，显示错误消息
-  if (!fs.existsSync(indexPath)) {
+  if (!finalIndexPath) {
     console.error('错误: index.html文件不存在');
-    dialog.showErrorBox('启动错误', `找不到index.html文件: ${indexPath}\n请确保已正确构建应用`);
+    dialog.showErrorBox('启动错误', `找不到index.html文件\n请确保已正确构建应用`);
     app.quit();
     return;
   }
@@ -98,15 +117,17 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 800,
+    minWidth: 800, 
     minHeight: 600,
     title: 'MindCloud 3DViewer',
-    icon: path.join(__dirname, 'app/assets/icons/icon.png'),
+    icon: resolveAppPath('assets/images/mt3d.png') || path.join(__dirname, 'app/assets/images/mt3d.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      webSecurity: false,
-      allowRunningInsecureContent: true,
+      // 在开发环境下允许不安全的内容
+      webSecurity: !isDevelopment,
+      // 在开发环境下允许运行不安全的内容
+      allowRunningInsecureContent: isDevelopment,
       nodeIntegrationInWorker: true,
       sandbox: false
     }
@@ -142,21 +163,26 @@ function createWindow() {
       responseHeaders: {
         ...details.responseHeaders,
         'Cross-Origin-Opener-Policy': ['same-origin'],
-        'Cross-Origin-Embedder-Policy': ['require-corp']
+        'Cross-Origin-Embedder-Policy': ['require-corp'],
+        // 内容安全策略，开发环境下允许不安全的内联脚本和eval，生产环境下也允许内联脚本但不允许eval
+        // 允许加载本地字体资源
+        // 允许 worker-src 'self' blob:
+        'Content-Security-Policy': [isDevelopment ? 
+          "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; worker-src 'self' blob:" : 
+          "default-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; worker-src 'self' blob:"]
       }
     });
   });
 
   // 加载应用的index.html
-  // 使用loadFile而不是loadURL，直接加载文件路径
-  console.log(`加载文件: ${indexPath}`);
-  mainWindow.loadFile(indexPath).catch(err => {
+  console.log(`加载文件: ${finalIndexPath}`);
+  mainWindow.loadFile(finalIndexPath).catch(err => {
     console.error('加载文件失败:', err);
     dialog.showErrorBox('加载错误', `无法加载index.html: ${err.message}`);
   });
   
-  // 只在开发环境中打开开发者工具
-  if (isDevelopment) {
+  // 如果是开发环境且不是打包应用，打开开发者工具
+  if ((isDevelopment && !app.isPackaged) || process.argv.includes('--devtools')) {
     console.log('开发环境: 打开开发者工具');
     mainWindow.webContents.openDevTools();
   } else {
@@ -194,7 +220,7 @@ function createWindow() {
             dialog.showMessageBox(mainWindow, {
               title: '关于',
               message: 'MindCloud 3DViewer',
-              detail: ' 2025 Manifold Tech Limited\n版本: 0.0.1\n作者: Clarke Young',
+              detail: '\u00A9 2025 Manifold Tech Limited\n版本: 0.0.1\n作者: Clarke Young',
               buttons: ['确定']
             });
           }
@@ -216,6 +242,7 @@ function createWindow() {
   // 监听渲染进程中的错误
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
     console.error(`加载失败: ${errorCode} - ${errorDescription}`);
+    dialog.showErrorBox('加载错误', `页面加载失败: ${errorDescription}\n错误代码: ${errorCode}`);
   });
 
   // 监听渲染进程中的控制台消息
@@ -226,7 +253,7 @@ function createWindow() {
 
 // 注册自定义协议处理器，用于处理本地资源加载
 app.whenReady().then(() => {
-  // 注册自定义协议处理器，用于处理本地资源加载
+  // 注册自定义协议处理器
   protocol.registerFileProtocol('app', (request, callback) => {
     try {
       // 安全地解析URL，避免直接使用substring
@@ -238,16 +265,11 @@ app.whenReady().then(() => {
       const normalizedPath = path.normalize(urlPath).replace(/^\/+/, '');
       
       // 尝试两种可能的路径，优先使用build/app
-      const buildAppPath = path.join(__dirname, 'build/app', normalizedPath);
-      const appPath = path.join(__dirname, 'app', normalizedPath);
+      const filePath = resolveAppPath(normalizedPath);
       
-      // 检查文件是否存在并返回相应路径
-      if (fs.existsSync(buildAppPath)) {
-        console.log(`找到文件(build/app): ${normalizedPath}`);
-        return callback(buildAppPath);
-      } else if (fs.existsSync(appPath)) {
-        console.log(`找到文件(app): ${normalizedPath}`);
-        return callback(appPath);
+      if (filePath) {
+        console.log(`找到文件: ${normalizedPath}`);
+        return callback(filePath);
       } else {
         console.error(`找不到文件: ${normalizedPath}`);
         // 返回404错误，并提供更详细的错误信息

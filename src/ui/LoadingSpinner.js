@@ -59,16 +59,16 @@ export class LoadingSpinner {
 
             .messageContainer${this.elementID} {
                 height: 20px;
-                font-family: arial;
-                font-size: 12pt;
+                font-family: 'LXGW WenKai', arial, sans-serif; /* 使用中文字体 */
+                font-size: 14pt; /* 增大字体 */
                 color: #ffffff;
                 text-align: center;
                 vertical-align: middle;
             }
 
             .spinner${this.elementID} {
-                padding: 15px;
-                background: #07e8d6;
+                padding: 25px; /* 增加内边距使圆环更宽 */
+                background: rgb(34, 131, 195); /* 修改为蓝色 */
                 z-index:99999;
             
                 aspect-ratio: 1;
@@ -86,45 +86,49 @@ export class LoadingSpinner {
 
             .spinnerContainerPrimary${this.elementID} {
                 z-index:99999;
-                background-color: rgba(128, 128, 128, 0.75);
-                border: #666666 1px solid;
-                border-radius: 5px;
+                background-color: rgba(0, 0, 0, 0.8); /* 更深的背景色 */
+                border: none; /* 移除边框 */
+                border-radius: 10px; /* 更圆的边角 */
                 padding-top: 20px;
-                padding-bottom: 10px;
+                padding-bottom: 15px; /* 增加底部内边距 */
                 margin: 0;
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                transform: translate(-80px, -80px);
-                width: 180px;
+                transform: translate(-100px, -100px); /* 调整位置 */
+                width: 200px; /* 增加宽度 */
                 pointer-events: auto;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* 添加阴影 */
             }
 
             .spinnerPrimary${this.elementID} {
                 width: 120px;
-                margin-left: 30px;
+                height: 120px;
+                margin-left: 40px; /* 居中调整 */
             }
 
             .messageContainerPrimary${this.elementID} {
                 padding-top: 15px;
+                padding-bottom: 5px; /* 添加底部内边距 */
             }
 
             .spinnerContainerMin${this.elementID} {
                 z-index:99999;
-                background-color: rgba(128, 128, 128, 0.75);
-                border: #666666 1px solid;
-                border-radius: 5px;
-                padding-top: 20px;
+                background-color: rgba(0, 0, 0, 0.8); /* 更深的背景色 */
+                border: none; /* 移除边框 */
+                border-radius: 10px; /* 更圆的边角 */
+                padding-top: 15px;
                 padding-bottom: 15px;
                 margin: 0;
                 position: absolute;
-                bottom: 50px;
+                bottom: 30px; /* 调整位置 */
                 left: 50%;
                 transform: translate(-50%, 0);
                 display: flex;
                 flex-direction: left;
                 pointer-events: auto;
                 min-width: 250px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* 添加阴影 */
             }
 
             .messageContainerMin${this.elementID} {
@@ -132,14 +136,14 @@ export class LoadingSpinner {
             }
 
             .spinnerMin${this.elementID} {
-                width: 50px;
+                width: 50px; /* 调整大小 */
                 height: 50px;
                 margin-left: 15px;
                 margin-right: 25px;
             }
 
             .messageContainerMin${this.elementID} {
-                padding-top: 15px;
+                padding-top: 15px; /* 调整位置 */
             }
             
             @keyframes load {

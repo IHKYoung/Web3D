@@ -769,14 +769,14 @@ export class Viewer {
                         this.loadingSpinner.setMessageForTask(loadingUITaskId, 'Download complete!');
                     } else {
                         if (progressiveLoad) {
-                            this.loadingSpinner.setMessageForTask(loadingUITaskId, 'Downloading splats...');
+                            this.loadingSpinner.setMessageForTask(loadingUITaskId, 'Downloading ...');
                         } else {
                             const suffix = percentCompleteLabel ? `: ${percentCompleteLabel}` : `...`;
                             this.loadingSpinner.setMessageForTask(loadingUITaskId, `Downloading${suffix}`);
                         }
                     }
                 } else if (loaderStatus === LoaderStatus.Processing) {
-                    this.loadingSpinner.setMessageForTask(loadingUITaskId, 'Processing splats...');
+                    this.loadingSpinner.setMessageForTask(loadingUITaskId, 'Processing ...');
                 }
             }
         };
@@ -1110,7 +1110,7 @@ export class Viewer {
             this.splatRenderReady = false;
             return new Promise((resolve) => {
                 if (showLoadingUI) {
-                    splatProcessingTaskId = this.loadingSpinner.addTask('Processing splats...');
+                    splatProcessingTaskId = this.loadingSpinner.addTask('Processing ...');
                 }
                 delayedExecute(() => {
                     if (this.isDisposingOrDisposed()) {
@@ -1208,7 +1208,7 @@ export class Viewer {
                 if (showLoadingUIForSplatTreeBuild && splatCount >= MIN_SPLAT_COUNT_TO_SHOW_SPLAT_TREE_LOADING_SPINNER) {
                     if (!finished && !splatOptimizingTaskId) {
                         this.loadingSpinner.setMinimized(true, true);
-                        splatOptimizingTaskId = this.loadingSpinner.addTask('Optimizing data structures...');
+                        splatOptimizingTaskId = this.loadingSpinner.addTask('Optimizing ...');
                     }
                 }
             };

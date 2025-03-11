@@ -45,7 +45,7 @@ h1 {
 .file-input-label {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #007bff;
+  background-color: rgb(34, 131, 195);
   color: #ffffff;
   border-radius: 5px;
   cursor: pointer;
@@ -54,12 +54,12 @@ h1 {
 }
 
 .file-input-label:hover {
-  background-color: #0056b3;
+  background-color: rgb(60, 156, 221);
 }
 
 .file-input-label:active {
   transform: scale(0.9); /* 点击时的缩放效果 */
-  background-color: #004da0;
+  background-color: rgb(27, 102, 152);
 }
 
 #viewFile {
@@ -74,7 +74,7 @@ h1 {
 .btn-view {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #28a745;
+  background-color: rgb(54, 176, 123);
   color: #ffffff;
   border-radius: 5px;
   cursor: pointer;
@@ -83,12 +83,12 @@ h1 {
 }
 
 .btn-view:hover {
-  background-color: #218838;
+  background-color: rgb(87, 204, 153);
 }
 
 .btn-view:active {
   transform: scale(0.9); /* 点击时的缩放效果 */
-  background-color: #1e7e34;
+  background-color: rgb(42, 137, 96);
 }
 
 #viewStatus {

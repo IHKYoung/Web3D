@@ -140,6 +140,12 @@ function runViewer(splatBufferData, format, alphaRemovalThreshold, cameraUpArray
     const viewer = new GaussianSplats3D.Viewer(viewerOptions);
     viewer.addSplatBuffers([splatBuffer], [splatBufferOptions])
       .then(() => {
+        // 为查看器的canvas元素添加类名
+        const viewerCanvas = document.querySelector('canvas');
+        if (viewerCanvas) {
+          viewerCanvas.className = 'viewer-canvas';
+        }
+        
         viewer.start();
         window.utils.setViewLoadingIconVisibility(false);
         window.utils.setViewStatus("场景加载成功。");

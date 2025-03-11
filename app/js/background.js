@@ -33,6 +33,9 @@ bgContainer.appendChild(background);
 // 存储所有实体
 var entities = [];
 
+// 地形显示控制
+var showTerrain = true;
+
 /**
  * 地形类
  * @param {Object} options 配置选项
@@ -56,6 +59,9 @@ function Terrain(options) {
   
   // 将地形画布添加到背景容器中
   bgContainer.appendChild(this.terrain);
+  
+  // 根据显示控制设置地形可见性
+  this.terrain.style.display = showTerrain ? 'block' : 'none';
 }
 
 /**
@@ -96,6 +102,9 @@ Terrain.prototype.resize = function(newWidth, newHeight) {
  * 更新地形
  */
 Terrain.prototype.update = function () {
+  // 如果地形不显示，则不更新
+  if (!showTerrain || this.terrain.style.display === 'none') return;
+  
   this.terCtx.clearRect(0, 0, width, height);
   this.terCtx.fillStyle = this.fillStyle;
 
@@ -200,6 +209,24 @@ ShootingStar.prototype.update = function () {
 };
 
 /**
+ * 控制地形显示的函数
+ * @param {boolean} show 是否显示地形
+ */
+function toggleTerrain(show) {
+  showTerrain = show;
+  
+  // 更新现有地形的可见性
+  for (var i = 0; i < entities.length; i++) {
+    if (entities[i] instanceof Terrain) {
+      entities[i].terrain.style.display = show ? 'block' : 'none';
+    }
+  }
+}
+
+// 将控制函数添加到全局作用域
+window.toggleTerrain = toggleTerrain;
+
+/**
  * 初始化背景
  */
 function initBackground() {
@@ -226,9 +253,11 @@ function initBackground() {
   entities.push(new ShootingStar());
 
   // 创建地形
-  entities.push(new Terrain({ mHeight: (height / 2) - 120, displacement: 140 }));
-  entities.push(new Terrain({ displacement: 120, scrollDelay: 50, fillStyle: "rgb(17,20,40)", mHeight: (height / 2) - 60 }));
-  entities.push(new Terrain({ displacement: 380, scrollDelay: 20, fillStyle: "rgb(10,10,5)", mHeight: height / 2 }));
+  if (showTerrain) {
+    entities.push(new Terrain({ mHeight: (height / 2) - 120, displacement: 140 }));
+    entities.push(new Terrain({ displacement: 120, scrollDelay: 50, fillStyle: "rgb(17,20,40)", mHeight: (height / 2) - 60 }));
+    entities.push(new Terrain({ displacement: 380, scrollDelay: 20, fillStyle: "rgb(10,10,5)", mHeight: height / 2 }));
+  }
 }
 
 // 初始化背景
@@ -274,10 +303,41 @@ window.addEventListener('resize', function() {
   if (Math.abs(width - oldWidth) > oldWidth * 0.2 || Math.abs(height - oldHeight) > oldHeight * 0.2) {
     initBackground();
   } else {
-    // 否则只调整现有地形
+    // 调整现有地形
     for (var i = 0; i < entities.length; i++) {
       if (entities[i] instanceof Terrain) {
         entities[i].resize(width, height);
+      }
+    }
+    
+    // 调整星星数量 - 根据新尺寸计算目标星星数量
+    var currentStarCount = 0;
+    for (var i = 0; i < entities.length; i++) {
+      if (entities[i] instanceof Star) {
+        currentStarCount++;
+      }
+    }
+    
+    var targetStarCount = Math.floor(width * height / 1000);
+    
+    // 如果当前星星数量小于目标数量，添加新星星
+    if (currentStarCount < targetStarCount) {
+      for (var i = 0; i < targetStarCount - currentStarCount; i++) {
+        entities.push(new Star({
+          x: Math.random() * width,
+          y: Math.random() * height
+        }));
+      }
+    } 
+    // 如果当前星星数量大于目标数量的1.5倍，移除多余星星
+    else if (currentStarCount > targetStarCount * 1.5) {
+      var starsToRemove = currentStarCount - targetStarCount;
+      var removedCount = 0;
+      for (var i = entities.length - 1; i >= 0 && removedCount < starsToRemove; i--) {
+        if (entities[i] instanceof Star) {
+          entities.splice(i, 1);
+          removedCount++;
+        }
       }
     }
   }

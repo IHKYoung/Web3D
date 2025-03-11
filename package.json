@@ -2,22 +2,24 @@
     "name": "gaussian-splats-3d-electron",
     "repository": {
         "type": "git",
-        "url": "https://github.com/mkkellogg/GaussianSplats3D"
+        "url": "https://github.com/IHKYoung/Web3D"
     },
     "version": "0.4.7",
     "description": "Three.js-based 3D Gaussian splat viewer - Electron App",
     "module": "build/gaussian-splats-3d.module.js",
     "main": "main.js",
-    "author": "Mark Kellogg",
+    "author": "Clarke Young",
     "license": "MIT",
     "type": "module",
     "scripts": {
         "build-demo": "mkdir -p ./build/demo && cp -r ./demo ./build/ && cp ./node_modules/three/build/three.module.js ./build/demo/lib/three.module.js",
+        "build-app": "mkdir -p ./build/app && cp -r ./src ./build/ && cp ./node_modules/three/build/three.module.js ./build/app/lib/three.module.js",
         "build-library": "npx rollup -c && mkdir -p ./build/demo/lib && cp ./build/gaussian-splats-3d.module.* ./build/demo/lib/",
-        "build": "npm run build-library && npm run build-demo",
+        "build": "npm run build-library && npm run build-app",
         "build-demo-windows": "(if not exist \".\\build\\demo\" mkdir .\\build\\demo) && xcopy /E .\\demo .\\build\\demo && xcopy .\\node_modules\\three\\build\\three.module.js .\\build\\demo\\lib\\",
+        "build-app-windows": "(if not exist \".\\build\\app\" mkdir .\\build\\app) && xcopy /E .\\src .\\build\\app && xcopy .\\node_modules\\three\\build\\three.module.js .\\build\\app\\lib\\",
         "build-library-windows": "npx rollup -c && (if not exist \".\\build\\demo\\lib\" mkdir .\\build\\demo\\lib) && copy .\\build\\gaussian-splats-3d* .\\build\\demo\\lib\\",
-        "build-windows": "npm run build-library-windows && npm run build-demo-windows",
+        "build-windows": "npm run build-library-windows && npm run build-app-windows",
         "watch": "npx npm-watch",
         "demo": "node util/server.js -d ./build/demo",
         "fix-styling": "npx stylelint **/*.scss --fix",
@@ -26,7 +28,17 @@
         "prettify": "npx prettier --write 'src/**/*.js'",
         "electron-install": "npm install electron@latest electron-builder@latest --save-dev",
         "start": "electron .",
-        "package-win": "electron-builder --win --x64"
+        "package-win-x64": "electron-builder --win --x64",
+        "package-win-ia32": "electron-builder --win --ia32",
+        "package-win-all": "electron-builder --win --x64 --ia32",
+        "package-mac-intel": "electron-builder --mac --x64",
+        "package-mac-arm": "electron-builder --mac --arm64",
+        "package-mac-universal": "electron-builder --mac --universal",
+        "package-linux-x64": "electron-builder --linux --x64",
+        "package-linux-arm64": "electron-builder --linux --arm64",
+        "package-linux-armv7l": "electron-builder --linux --armv7l",
+        "package-linux-all": "electron-builder --linux --x64 --arm64 --armv7l",
+        "package-all": "electron-builder -mwl --x64 --arm64 --universal"
     },
     "watch": {
         "build-library": {
@@ -37,6 +49,11 @@
         "build-demo": {
             "patterns": [
                 "demo/**/*.*"
+            ]
+        },
+        "build-app": {
+            "patterns": [
+                "src/**/*.js"
             ]
         }
     },
@@ -82,7 +99,7 @@
         "build/gaussian-splats-3d.module.js.map"
     ],
     "build": {
-        "appId": "com.gaussiansplats3d.app",
+        "appId": "com.ahaknow.3d",
         "productName": "Gaussian Splats 3D Viewer",
         "directories": {
             "output": "dist"

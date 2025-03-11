@@ -12,22 +12,22 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
-        "build-demo": "mkdir -p ./build/demo && cp -r ./demo ./build/ && cp ./node_modules/three/build/three.module.js ./build/demo/lib/three.module.js",
-        "build-app": "mkdir -p ./build/app && cp -r ./src ./build/ && cp ./node_modules/three/build/three.module.js ./build/app/lib/three.module.js",
-        "build-library": "npx rollup -c && mkdir -p ./build/demo/lib && cp ./build/gaussian-splats-3d.module.* ./build/demo/lib/",
+        "build-app": "mkdir -p ./build/app && cp -r ./app/* ./build/app/ && cp ./node_modules/three/build/three.module.js ./build/app/lib/three.module.js",
+        "build-library": "npx rollup -c && mkdir -p ./build/app/lib && mv ./build/gaussian-splats-3d.module.* ./build/app/lib/",
         "build": "npm run build-library && npm run build-app",
-        "build-demo-windows": "(if not exist \".\\build\\demo\" mkdir .\\build\\demo) && xcopy /E .\\demo .\\build\\demo && xcopy .\\node_modules\\three\\build\\three.module.js .\\build\\demo\\lib\\",
-        "build-app-windows": "(if not exist \".\\build\\app\" mkdir .\\build\\app) && xcopy /E .\\src .\\build\\app && xcopy .\\node_modules\\three\\build\\three.module.js .\\build\\app\\lib\\",
-        "build-library-windows": "npx rollup -c && (if not exist \".\\build\\demo\\lib\" mkdir .\\build\\demo\\lib) && copy .\\build\\gaussian-splats-3d* .\\build\\demo\\lib\\",
+        "build-app-windows": "(if not exist \".\\build\\app\" mkdir .\\build\\app) && xcopy /E /Y .\\app\\* .\\build\\app\\ && xcopy /Y .\\node_modules\\three\\build\\three.module.js .\\build\\app\\lib\\",
+        "build-library-windows": "npx rollup -c && (if not exist \".\\build\\app\\lib\" mkdir .\\build\\app\\lib) && move /Y .\\build\\gaussian-splats-3d* .\\build\\app\\lib\\",
         "build-windows": "npm run build-library-windows && npm run build-app-windows",
         "watch": "npx npm-watch",
-        "demo": "node util/server.js -d ./build/demo",
+        "app": "node util/server.js -d ./build/app",
         "fix-styling": "npx stylelint **/*.scss --fix",
         "fix-js": "npx eslint src --fix",
         "lint": "npx eslint 'src/**/*.js' || true",
         "prettify": "npx prettier --write 'src/**/*.js'",
         "electron-install": "npm install electron@latest electron-builder@latest --save-dev",
         "start": "electron .",
+        "dev": "set NODE_ENV=development && electron .",
+        "dist": "set NODE_ENV=production && electron .",
         "package-win-x64": "electron-builder --win --x64",
         "package-win-ia32": "electron-builder --win --ia32",
         "package-win-all": "electron-builder --win --x64 --ia32",
@@ -44,11 +44,6 @@
         "build-library": {
             "patterns": [
                 "src/**/*.js"
-            ]
-        },
-        "build-demo": {
-            "patterns": [
-                "demo/**/*.*"
             ]
         },
         "build-app": {
@@ -114,7 +109,7 @@
             "target": [
                 "nsis"
             ],
-            "icon": "build/demo/assets/images/garden.png"
+            "icon": "build/app/assets/images/mt3d.png"
         }
     }
 }

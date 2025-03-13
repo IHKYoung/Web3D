@@ -66,9 +66,12 @@ function viewSplat() {
       let format;
 
       const fileExtension = file.name.split('.').pop().toLowerCase();
+      console.log(fileExtension);
       if (fileExtension === 'ply') {
         format = GaussianSplats3D.SceneFormat.Ply;
       } else if (fileExtension === 'splat') {
+        format = GaussianSplats3D.SceneFormat.Splat;
+      } else if (fileExtension === 'mt3d') {
         format = GaussianSplats3D.SceneFormat.Splat;
       } else if (fileExtension === 'ksplat') {
         format = GaussianSplats3D.SceneFormat.KSplat;

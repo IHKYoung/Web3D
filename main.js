@@ -120,7 +120,7 @@ function createWindow() {
     minWidth: 800, 
     minHeight: 600,
     title: 'MindCloud 3DViewer',
-    icon: resolveAppPath('assets/images/mt3d.png') || path.join(__dirname, 'app/assets/images/mt3d.png'),
+    icon: resolveAppPath('assets/images/lx.png') || path.join(__dirname, 'app/assets/images/lx.png'),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

@@ -1,11 +1,11 @@
 {
-    "name": "gaussian-splats-3d-electron",
+    "name": "mindcloud-3dviewer",
     "repository": {
         "type": "git",
         "url": "https://github.com/IHKYoung/Web3D"
     },
-    "version": "0.4.7",
-    "description": "Three.js-based 3D Gaussian splat viewer - Electron App",
+    "version": "0.0.1",
+    "description": "MindCloud 3DViewer",
     "module": "build/gaussian-splats-3d.module.js",
     "main": "main.js",
     "author": "Clarke Young",
@@ -95,8 +95,8 @@
         "build/gaussian-splats-3d.module.js.map"
     ],
     "build": {
-        "appId": "com.ahaknow.3d",
-        "productName": "Gaussian Splats 3D Viewer",
+        "appId": "co.com.manifold.3dviewer",
+        "productName": "MindCloud 3DViewer",
         "directories": {
             "output": "dist"
         },
@@ -110,7 +110,11 @@
             "target": [
                 "nsis"
             ],
-            "icon": "build/app/assets/images/mt3d.png"
+            "icon": "build/app/assets/images/lx.png",
+            "signtoolOptions": {
+                "certificateFile": "lx.pfx",
+                "certificatePassword": "LX2025"
+            }
         }
     }
 }
